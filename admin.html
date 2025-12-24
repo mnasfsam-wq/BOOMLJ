@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>غرفة التحكم - MOSSLIM ADMIN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-white p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-4xl font-bold text-yellow-500 mb-8 border-b border-yellow-500 pb-4">الإدارة العليا للموقع 👑</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-slate-900 p-6 rounded-2xl border border-indigo-500">
+                <h2 class="text-xl mb-4 text-indigo-400">تحكم فوري بالمتصفحات</h2>
+                <input id="msg" type="text" placeholder="اكتب رسالة للمستخدمين..." class="w-full p-3 bg-slate-800 rounded mb-4 outline-none">
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="send('alert')" class="bg-indigo-600 px-4 py-2 rounded font-bold">إرسال تنبيه</button>
+                    <button onclick="send('maintenance')" class="bg-red-600 px-4 py-2 rounded font-bold">قفل الموقع (صيانة)</button>
+                    <button onclick="send('stop_maintenance')" class="bg-green-600 px-4 py-2 rounded font-bold">فتح الموقع</button>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 p-6 rounded-2xl border border-green-500">
+                <h2 class="text-xl mb-4 text-green-400">سجل الزيارات المباشر</h2>
+                <div id="logs" class="h-64 overflow-y-auto text-xs font-mono">جاري المراقبة...</div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCPl7IapoP82wZq-PlJZ9y4Jm5p-7JrFxw",
+            authDomain: "moim-system.firebaseapp.com",
+            projectId: "moim-system",
+            storageBucket: "moim-system.firebasestorage.app",
+            messagingSenderId: "680675651442",
+            appId: "1:680675651442:web:caa969aee19a02822db7eb",
+            measurementId: "G-PFVYN2JF3C"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        window.send = (type) => {
+            const text = document.getElementById('msg').value;
+            set(ref(db, 'system/command'), { type, text, time: Date.now() });
+            alert("تم إرسال الأمر بنجاح!");
+        };
+
+        onValue(ref(db, 'logs'), (snapshot) => {
+            const data = snapshot.val();
+            let h = "";
+            for(let k in data) h = `<p class="mb-1 border-b border-slate-800 pb-1">> ${data[k].user} سجل دخول (${data[k].time})</p>` + h;
+            document.getElementById('logs').innerHTML = h;
+        });
+    </script>
+</body>
+</html>
